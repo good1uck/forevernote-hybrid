@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>参赛版原型 · 草图 2</title>
+<title>ForeverNote Hybrid</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
     background: #f3f1ea;
     color: #222;
     min-height: 100vh;
@@ -102,28 +102,28 @@
 </head>
 <body>
   <div class="sheet">
-    <h1>参赛版原型</h1>
-    <div class="sub" id="subtitle">刚打开：还没选笔记</div>
+    <h1>ForeverNote Hybrid</h1>
+    <div class="sub" id="subtitle">No note selected yet</div>
     <div class="steps">
-      <div class="step on" id="step1">1 选笔记</div>
-      <div class="step" id="step2">2 总结</div>
-      <div class="step" id="step3">3 看路径</div>
+      <div class="step on" id="step1">1 Select a note</div>
+      <div class="step" id="step2">2 Summarize</div>
+      <div class="step" id="step3">3 See the path</div>
     </div>
     <div class="split">
       <div class="left">
         <div class="list" id="list"></div>
-        <div class="label">原文</div>
-        <div class="pane" id="source"><span class="placeholder">选一篇样例后，原文显示在这里</span></div>
+        <div class="label">Original</div>
+        <div class="pane" id="source"><span class="placeholder">Select a sample to show the original here.</span></div>
       </div>
       <div class="right">
         <div class="pane" id="summary">
-          <span class="placeholder" id="summaryText">先选一篇笔记</span>
-          <div class="badge wait" id="badge">本机 / 云端</div>
+          <span class="placeholder" id="summaryText">Select a note first</span>
+          <div class="badge wait" id="badge">On-device / Cloud</div>
         </div>
-        <button id="go" disabled>总结这篇</button>
+        <button id="go" disabled>Summarize this note</button>
       </div>
     </div>
-    <div class="foot">Firebase 项目 forevernote-hybrid。优先本机模型，没有就走云端。角标是这次请求实际走的路径。</div>
+    <div class="foot">Firebase project forevernote-hybrid. The page tries the on-device model first, and uses the cloud when that model is not available. The badge shows the path this request actually took.</div>
   </div>
 <script type="module">
 const RECAPTCHA_SITE_KEY = "6LfM1yUuAAAAAJcilJ9N55DAkOYCYZKdktfMwjkQ";
@@ -161,22 +161,19 @@ const model = getGenerativeModel(ai, { mode: InferenceMode.PREFER_ON_DEVICE });
 const NOTES = [
   {
     id: "a",
-    title: "样例 A · 来回的一天",
-    body: "早上闹钟响了两次才起来。原定九点跟老周对一下展览的布展顺序，出门发现楼下的共享单车全是坏的，走了十几分钟才扫到一辆。到咖啡馆已经九点二十。老周没生气，他自己也刚到，笔记本还没打开，杯子上的奶泡已经塌了。我们本来只想确认三面墙的先后，结果他拿出甲方昨晚发来的一长串修改：入口的说明要缩短，第二面墙的时间线要倒过来，结尾那张雨后的照片他们觉得太暗。我一边记一边觉得这些意见互相打架。说明要短，时间线却要再加两个年份。照片太暗，可那点暗就是当时的光线，提亮之后地面的水渍会消失。\n\n对完已经十一点半。我没吃饭，去公司楼下买了个饭团，在工位上边吃边改说明。第一稿删了很多，读起来像通知。第二稿把年份补回去，又长了。第三稿我干脆回到最初的句子，只去掉两个形容词。改完盯着屏幕发呆，不知道这算不算交差。下午两点有个内部会，谈下个月要不要把周末开放日改成预约制。我准备听一听就行，会开到一半，主持人点名问展览这边的人流怎么估。我只能说布展还没定，开放日的人数我答不上。会后主管把我留下来，问甲方的修改今天能不能回。我说文字可以今天回，照片我想再看一眼原图，不想在邮件里先答应换掉。他问要不要把提亮版先发过去占个位置，我摇头。占位置往往就变成已经答应。回到工位，我把时间线又拉出来看了一遍。倒过来之后，参观的人会先看见结局，再看见开始。这也许是甲方想要的悬念，也许只是邮件里随手写的一句。老周下午发来消息，说他倾向于照做，因为再争一次，布展要再延三天。我回他：文字照做，照片先不争输赢，只给两个版本。发出去之后我又觉得“不争输赢”写得太满，像在表态。消息已经显示已读，就没有再改。\n\n傍晚下雨。我把原图拷到自己电脑上，做了两个版本，一个提亮，一个保持原来的暗。提亮之后水渍没了，现场那种刚下过雨的感觉也没了。我把两张都存好，邮件里只写了说明已按意见缩短，照片明天给两个版本，请他们选。发送之前又读了一遍，把“请查收”改成“明天补上”，觉得这样比较不像在推脱。回到家把湿鞋放在门口，热了剩下的粥。粥有点糊，底部结了一层。吃的时候还在想那张照片，想完又觉得今天来回处理的全是别人的句子，自己一句都没写下。碗泡在水池里，我打开这篇笔记，才把这一天按顺序记下来。",
-    summary: "这天本来只对一下布展顺序，结果卷进甲方互相打架的修改：缩短说明、倒转时间线、换掉偏暗的照片。说明改了三稿又回到初稿，只删了两个形容词。下午被临时追问开放日人流，只能说还估不了。晚上做了提亮和保持原暗两个版本，邮件里先回了文字，照片留到明天。回到家还在想那张照片，觉得这一天处理的都是别人的句子。"
+    title: "Sample A · A day of back and forth",
+    body: "The alarm went off twice before I got up. I was supposed to meet Lao Zhou at nine to settle the order of the exhibition walls. Downstairs, every shared bike was broken, and I walked more than ten minutes before I could unlock one. I reached the cafe at nine twenty. Lao Zhou was not annoyed. He had just arrived himself. His laptop was still closed, and the foam on his cup had already collapsed. We only meant to confirm the order of three walls. Then he pulled out a long list of changes the client had sent the night before: shorten the text at the entrance, reverse the timeline on the second wall, and they thought the rain photo at the end was too dark. As I wrote them down, the comments fought each other. The text should be shorter, but the timeline needed two more years. The photo was dark, but that darkness was the light at the time. Brighten it and the puddles on the ground disappear.\n\nWe finished at half past eleven. I had not eaten. I bought a rice ball downstairs from the office and edited the wall text at my desk. The first draft cut too much and read like a notice. The second put the years back and got long again. For the third I returned to the original sentences and removed only two adjectives. Then I stared at the screen, unsure whether that counted as done. At two there was an internal meeting about whether next month's weekend open day should become reservation-only. I planned to just listen. Halfway through, the host asked the exhibition side how we would estimate the crowd. I could only say the install was not settled, so I could not give a number. After the meeting my manager kept me back and asked whether the client's changes could be answered today. I said the text could go back today. I wanted another look at the original photo and did not want to promise a replacement in the email. He asked whether we should send the brightened version first, just to hold the place. I shook my head. Holding a place usually turns into having agreed. Back at my desk I opened the timeline again. Reversed, visitors would see the ending before the beginning. That might be the suspense the client wanted, or just a line typed into an email. Lao Zhou messaged in the afternoon that he would rather follow the list, because another argument would delay the install by three days. I replied: follow them on the text, and do not fight the photo yet, just offer two versions. After I sent it I felt that \"do not fight\" was too grand, like a statement. It already showed as read, so I left it.\n\nIt rained in the evening. I copied the original onto my own computer and made two versions, one brightened and one kept dark. After brightening, the puddles were gone, and so was the feeling that the rain had just stopped. I saved both. The email said only that the text had been shortened as requested, and that two photo versions would come tomorrow for them to choose. Before sending I read it again and changed \"please find attached\" to \"I will add them tomorrow,\" which felt less like stalling. At home I left my wet shoes by the door and heated the leftover porridge. It was a little burnt, with a skin at the bottom. While I ate I was still thinking about that photo, and then I felt the whole day had been spent moving other people's sentences. I had not written one of my own. The bowl sat in the sink. I opened this note and only then wrote the day down in order.",
   },
   {
     id: "b",
-    title: "样例 B · 修那扇窗",
-    body: "先写结论好像也行，可我还是想从声音写起。半夜那扇窗又响，不是风大，是挂钩松了，一下一下敲窗框。我起来按了按，当时不响了，早上又响。房东在群里说他这周在外地，让我自己先看看，五金店就在路口。我下楼的时候其实想的不是窗，是昨天没回的那条消息，同学问我还去不去看展。我回了个“看情况”，现在觉得这四个字很讨厌。\n\n五金店老板问我要多大的螺丝。我说不出来。他让我拿旧的来。我又上楼，窗钩后面的那颗又锈又短，拧下来的时候墙皮掉了一小块。我把灰吹掉，装进口袋，下楼时在楼梯上遇见邻居的猫，猫蹲在鞋架上看我，好像我口袋里有吃的。老板看了螺丝，说这种规格现在少，先拿两颗近似的试试，不合适再换。我还买了一小卷密封条，因为缝里有风，响也许不只有挂钩的原因。\n\n回来先吃饭。面条煮过了，我还是吃完。吃的时候把密封条放在桌上，看了半天说明书，字很小。说明书假设窗框是直的，还画了箭头，从室内指向室外。我把纸条转了两次，还是不确定贴在哪一侧。楼下有人按喇叭，一声一声，和夜里的窗有点像，我才想起自己坐在这里是为了修窗，不是为了研究一张纸。装的时候发现窗框不是直的，左边紧，右边留着一条缝。我用手电照过那条缝，灰和一点柳絮堆在下面，所以风不是均匀地进来，而是从右下角钻。若只换螺丝，这个声音也许还会在。密封条贴上去，风小了，挂钩却更难扣上。我拆下来重贴，贴歪了一次。第二次勉强平。螺丝换上之后，窗不敲了，可关死要多使一点劲。我开开关关试了四五次，第一次还有一点金属碰金属的轻响，后面几次没有了。我坐在地板上听，屋里安静得能听见冰箱。猫不在楼梯上了。我把工具收进抽屉时又打开，怕明天还要拆。说明书揉成一团扔了，又捡回来夹进抽屉，因为上面写着规格，虽然我已经看不清。\n\n本来可以写到这里。可我又打开同学那条消息，还是没回。看展的事和窗没有关系，我却觉得是同一件没做完的事：都是先拖着，等它再响一次。晚上房东问好了没，我回好了，又补了一句墙皮掉了一点，他发了个表情，没说要不要补墙。我盯着那个表情看了一会，把它理解成“知道了就行”。如果明天还响，我再问他要不要换整套挂钩，而不是再买第三颗差不多的螺丝。我把旧螺丝放在窗台上，想着明天如果还响，就不要再自己猜规格。",
-    summary: "窗钩松了，夜里一下一下敲窗框。房东不在，让我自己去路口五金店。我说不出螺丝规格，拿着旧的去才买到近似的，顺手带了密封条。窗框不直，密封条贴了两次，风小了，关窗却更费劲。中间还挂着一条没回的消息，同学问还去不去看展，我之前只回了“看情况”。窗暂时不响了，旧螺丝还留在窗台上。"
+    title: "Sample B · Fixing that window",
+    body: "I could start with the conclusion, but I still want to start with the sound. In the middle of the night that window rattled again. It was not a strong wind. The hook was loose and tapped the frame, once and then again. I got up and pressed it. It stopped, then started again in the morning. The landlord said in the group chat that he was out of town this week and I should look myself. The hardware store is at the corner. On the way downstairs I was not thinking about the window. I was thinking about a message I had not answered. A classmate asked whether I was still going to the exhibition. I had replied \"we'll see,\" and those words annoy me now.\n\nThe owner asked what size screw I needed. I could not say. He told me to bring the old one. I went back up. The screw behind the hook was rusty and short, and a chip of plaster came off when I unscrewed it. I blew the dust away, put it in my pocket, and on the stairs met the neighbor's cat. It sat on the shoe rack watching me, as if I had food in my pocket. The owner looked at the screw and said that size is scarce now. Try two close ones, and exchange them if they do not fit. I also bought a small roll of weather seal, because air came through the gap. The noise might not be only the hook.\n\nI ate first. The noodles were overcooked and I finished them anyway. While I ate I left the seal on the table and studied the instructions. The print was tiny. They assumed a straight frame and drew an arrow from indoors to outdoors. I turned the strip twice and still was not sure which side to stick. Someone honked downstairs, one blast after another, a bit like the window at night, and I remembered I was sitting there to fix the window, not to study a piece of paper. When I fitted it, the frame was not straight. The left side was tight and the right side left a gap. I shone a flashlight into it. Dust and a little willow fluff had collected at the bottom, so the wind did not come in evenly. It came in from the lower right. A new screw alone might not stop the sound. With the seal on, the draft was smaller, but the hook was harder to catch. I peeled it off and stuck it again. The first time it was crooked. The second time it was barely level. After the screw went in, the window stopped knocking, but closing it took more force. I opened and closed it four or five times. The first time there was still a light metal tap. The later times were quiet. I sat on the floor and listened. The room was quiet enough to hear the fridge. The cat was gone from the stairs. I put the tools in the drawer, then opened it again, in case I had to take them out tomorrow. I crumpled the instructions and threw them away, then picked them up and clipped them in the drawer, because the size was printed there, even though I could no longer read it.\n\nI could have stopped there. I opened the classmate's message again and still did not reply. The exhibition has nothing to do with the window, but they felt like the same unfinished thing: leave it, and wait until it makes a noise again. In the evening the landlord asked if it was fixed. I said yes, and added that a bit of plaster had come off. He sent an emoji and did not say whether the wall should be patched. I looked at the emoji for a while and decided it meant that he had noted it. If it rattles again tomorrow, I will ask him about replacing the whole hook, not about buying a third almost-right screw. I left the old screw on the windowsill. If it rattles tomorrow, I will not guess the size myself.",
   },
   {
     id: "c",
-    title: "样例 C · 连着三天",
-    body: "周五晚上下班后没有直接回家。我在公司附近的打印店把一叠旧照片扫了，店员说当天取不了，周六上午来。照片是家里寄来的，没有年份，背面只有铅笔写的“河边”“过年”“不知道是谁”。我本来想当晚就建一个文件夹，按能认出的人分成几堆。打印店一关门，这个计划就停了。回家只煮了面，看了半集重复的节目，笔记里写下“明天去取”，就睡了。\n\n周六去得不早。打印店把文件拷进我的U盘，另外给了一张接触表，很小，人脸都糊。店员提醒我文件名是扫描顺序，不是拍摄顺序，打乱了也不要惊讶。我在店门口的长椅上翻了一遍，能叫出名字的不到一半。有几张连着出现，明显是同一次快门按下去的，表情只差一点点。这种重复让文件夹更难建：留一张代表就好，可我现在还不知道哪一张才算代表。我在纸上写了“先别删重复”，就把笔帽扣上。有一张是厨房，水龙头的样式还是老房子里的，可我不确定是哪一间厨房。另一张有个穿校服的人站在桥上，背对镜头，可能是表哥，也可能是邻居家的哥哥。我没有在长椅上做决定，把U盘放回包里，先去买了菜。下午本来要开始分类，中间接了一个关于展览说明的电话，讲了四十分钟，挂掉之后光没了。我只新建了三个文件夹：认得、像是、先留着。一张都没拖进去。\n\n周日下雨，适合对着屏幕。我先把接触表上的编号抄到一个文本文件里，免得只靠记忆对照。抄到四十多行就烦了，改成只标我犹豫的那些。我把“认得”尽量填上，大概三十张，多数是过年的饭桌，同一套碗出现了很多次。蓝边的碗、一只缺了口的汤勺、桌布上的格子，这些重复比人脸可靠。可可靠不等于我认得每一个坐在碗后面的人。有个阿姨笑得很熟，我叫不出名字，就暂时不把整桌算作已经认完。填到后来标准松了，只要背景里有那盆绿萝，我就算认得这是老客厅。这样不对，我又把几张拖回“像是”。最耗时间的是那张桥。我放大校服的领子，还是看不出学校。给家里发消息问，半天没有回。傍晚回来说，桥是城北那座，人是表哥，那年他住在我们家。我把这张放进“认得”，在备注里写上年份仍然空着。三个文件夹终于都有了东西，“先留着”还是最多。我数了一下，留着的比认得的多出差不多一倍。这个比例让我有点安心，说明我没有为了做完而乱认。我没有删任何一张。今晚先停，下周再问碗和厨房的事。",
-    summary: "周五把家里寄来的旧照片送去扫描，当晚没取到，只记下明天去取。周六拿到文件和一张很糊的接触表，能叫出名字的不到一半；新建了“认得、像是、先留着”三个文件夹，一张都没放进去，下午又被电话打断。周日才开始分类，饭桌和绿萝让一些照片被放进“认得”，桥上穿校服的人后来确认为表哥，年份仍空着。“先留着”还是最多，没有删任何一张，厨房和碗留到下周再问。"
-  }
+    title: "Sample C · Three days in a row",
+    body: "Friday night I did not go straight home after work. At a print shop near the office I had a stack of old photos scanned. The clerk said they would not be ready that day. Come Saturday morning. The photos had been sent from home. None had a year. On the back, in pencil: \"by the river,\" \"New Year,\" \"no idea who this is.\" I meant to make folders that night and sort them by the people I could name. The shop closed and the plan stopped. At home I only cooked noodles, watched half of a repeat, wrote \"pick them up tomorrow\" in a note, and slept.\n\nI did not get there early on Saturday. The shop copied the files onto my USB drive and also gave me a contact sheet, very small, every face blurred. The clerk said the filenames were scan order, not the order the photos were taken, and I should not be surprised if they were mixed up. I went through them on the bench outside. I could name fewer than half. A few came in a run, clearly one press of the shutter after another, the expression only slightly different. That repetition made folders harder: one representative would do, but I did not yet know which one counted. I wrote \"do not delete duplicates yet\" and capped the pen. One photo was a kitchen. The faucet was the kind from the old apartment, but I was not sure which kitchen. Another showed someone in a school uniform on a bridge, back to the camera. It might be my cousin, or the neighbor's older brother. I did not decide on the bench. I put the drive back in my bag and went to buy groceries. I had meant to start sorting in the afternoon. A call about the exhibition text took forty minutes, and when I hung up the light was gone. I only created three folders: recognized, maybe, and keep for now. I dragged nothing into them.\n\nSunday rained, a good day to face the screen. I first copied the numbers from the contact sheet into a text file so I would not match them from memory. After forty lines I got irritated and marked only the ones I hesitated over. I filled \"recognized\" as far as I could, about thirty photos, mostly New Year dinner tables. The same set of bowls appeared again and again. Bowls with a blue rim, a soup spoon with a chip, the checks on the tablecloth. Those repeats were more reliable than faces. Reliable did not mean I knew every person sitting behind a bowl. One aunt smiled as if I knew her, and I could not say her name, so I did not count the whole table as identified. Later my standard loosened. If the pothos was in the background, I counted it as the old living room. That was wrong, and I dragged several back into \"maybe.\" The bridge photo took the longest. I zoomed in on the uniform collar and still could not tell the school. I messaged home and heard nothing for hours. In the evening they replied: the bridge is the one in the north of the city, the person is my cousin, and he was staying with us that year. I moved it into \"recognized\" and wrote in the note that the year was still blank. All three folders finally had something in them, and \"keep for now\" was still the largest. I counted. The ones I kept outnumbered the ones I recognized by almost two to one. That ratio was a relief. It meant I had not named people at random just to finish. I did not delete a single photo. I stopped for the night. Next week I will ask about the bowls and the kitchen.",
+  },
 ];
 
 const list = document.getElementById("list");
@@ -212,37 +209,37 @@ function setBadge(kind) {
   badge.className = "badge";
   if (kind === "wait") {
     badge.classList.add("wait");
-    badge.textContent = "本机 / 云端";
+    badge.textContent = "On-device / Cloud";
   } else if (kind === "local") {
     badge.classList.add("local");
-    badge.textContent = "本机";
+    badge.textContent = "On-device";
   } else {
     badge.classList.add("cloud");
-    badge.textContent = "云端";
+    badge.textContent = "Cloud";
   }
 }
 
 function renderPick() {
-  subtitle.textContent = "刚打开：还没选笔记";
-  source.innerHTML = '<span class="placeholder">选一篇样例后，原文显示在这里</span>';
+  subtitle.textContent = "No note selected yet";
+  source.innerHTML = '<span class="placeholder">Select a sample to show the original here.</span>';
   summaryText.className = "placeholder";
-  summaryText.textContent = "先选一篇笔记";
+  summaryText.textContent = "Select a note first";
   setBadge("wait");
   go.disabled = true;
-  go.textContent = "总结这篇";
+  go.textContent = "Summarize this note";
   setSteps("pick");
 }
 
 function renderReady() {
-  subtitle.textContent = "已选笔记：可以总结";
+  subtitle.textContent = "Note selected. You can summarize it.";
   source.innerHTML = '<div class="note-title"></div><div></div>';
   source.querySelector(".note-title").textContent = selected.title;
   source.querySelector("div:last-child").textContent = selected.body;
   summaryText.className = "placeholder";
-  summaryText.textContent = "点「总结这篇」，结果会出现在这里";
+  summaryText.textContent = "Click Summarize this note. The result will appear here.";
   setBadge("wait");
   go.disabled = false;
-  go.textContent = "总结这篇";
+  go.textContent = "Summarize this note";
   setSteps("ready");
 }
 
@@ -263,12 +260,12 @@ NOTES.forEach((note) => {
 
 function promptFor(note) {
   return [
-    "请用中文总结下面这篇日记。",
-    "只根据正文，不要补充正文里没有的事。",
-    "写成一段，大约 120 到 180 字。",
+    "Summarize the diary note below in English.",
+    "Use only the note. Do not add events that are not in it.",
+    "Write one paragraph of about 80 to 120 words.",
     "",
-    "标题：" + note.title,
-    "正文：",
+    "Title: " + note.title,
+    "Note:",
     note.body
   ].join("\n");
 }
@@ -277,17 +274,17 @@ go.addEventListener("click", async () => {
   if (!selected || running) return;
   running = true;
   go.disabled = true;
-  go.textContent = "正在总结";
-  subtitle.textContent = "正在总结";
+  go.textContent = "Summarizing";
+  subtitle.textContent = "Summarizing";
   summaryText.className = "placeholder";
-  summaryText.textContent = "正在准备本机模型";
+  summaryText.textContent = "Preparing the on-device model";
   setBadge("wait");
   setSteps("running");
   try {
     await model.initializeDeviceModel((value) => {
       const pct = Math.round(Number(value) * 100);
       if (pct > 0 && pct < 100) {
-        summaryText.textContent = "正在下载本机模型 " + pct + "%";
+        summaryText.textContent = "Downloading the on-device model " + pct + "%";
       }
     });
     const result = await model.generateContent(promptFor(selected));
@@ -297,24 +294,24 @@ go.addEventListener("click", async () => {
     summaryText.textContent = text;
     if (source === "ON_DEVICE") {
       setBadge("local");
-      subtitle.textContent = "完成：本次在本机";
+      subtitle.textContent = "Done. This request ran on-device.";
     } else if (source === "IN_CLOUD") {
       setBadge("cloud");
-      subtitle.textContent = "完成：本次在云端";
+      subtitle.textContent = "Done. This request ran in the cloud.";
     } else {
       setBadge("wait");
-      subtitle.textContent = "完成：路径未标明（" + String(result.response.inferenceSource) + "）";
+      subtitle.textContent = "Done. The path was not labeled (" + String(result.response.inferenceSource) + ").";
     }
     setSteps("done");
   } catch (error) {
     summaryText.className = "";
-    summaryText.textContent = "总结没有完成：" + (error && error.message ? error.message : String(error));
+    summaryText.textContent = "The summary did not finish: " + (error && error.message ? error.message : String(error));
     setBadge("wait");
-    subtitle.textContent = "总结没有完成";
+    subtitle.textContent = "The summary did not finish";
     setSteps("ready");
   }
   go.disabled = false;
-  go.textContent = "总结这篇";
+  go.textContent = "Summarize this note";
   running = false;
 });
 
