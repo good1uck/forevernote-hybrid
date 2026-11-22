@@ -31,3 +31,7 @@ Localhost cannot use the production reCAPTCHA key. App Check on localhost needs 
 - Firebase AI Logic, Gemini Developer API, `InferenceMode.PREFER_ON_DEVICE`
 - Firebase App Check, enforced for Firebase AI Logic
 - Firebase Hosting for the public page
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE).
