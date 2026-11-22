@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>参赛版原型 · 草图 2</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    background: #f3f1ea;
+    color: #222;
+    min-height: 100vh;
+    padding: 28px;
+  }
+  .sheet {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #c8c2b4;
+    padding: 22px 22px 18px;
+    min-height: 640px;
+    display: flex;
+    flex-direction: column;
+  }
+  h1 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .sub { color: #666; font-size: 13px; margin-bottom: 16px; }
+  .steps { display: flex; gap: 10px; margin-bottom: 14px; }
+  .step {
+    flex: 1;
+    border: 1px solid #bbb;
+    background: #f6f6f6;
+    color: #888;
+    text-align: center;
+    padding: 10px 8px;
+    font-size: 15px;
+  }
+  .step.on { background: #1f1f1f; color: #fff; border-color: #1f1f1f; }
+  .step.done { background: #fff; color: #222; border-color: #222; }
+  .split { display: flex; gap: 16px; flex: 1; min-height: 460px; }
+  .left, .right { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .list { border: 1px solid #222; margin-bottom: 8px; }
+  .item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    padding: 10px 12px;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    font-size: 15px;
+    cursor: pointer;
+    background: #fff;
+  }
+  .item:last-child { border-bottom: none; }
+  .item:hover { background: #f7f7f7; }
+  .item.selected { background: #1f1f1f; color: #fff; }
+  .label { font-size: 14px; margin: 8px 0; }
+  .pane {
+    border: 1px solid #222;
+    min-height: 220px;
+    max-height: 420px;
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #333;
+    position: relative;
+    white-space: pre-wrap;
+    background: #fff;
+  }
+  .placeholder { color: #888; }
+  .badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: 1px solid #222;
+    padding: 4px 8px;
+    font-size: 13px;
+    background: #fff;
+    color: #222;
+    line-height: 1.4;
+  }
+  .badge.wait { color: #888; border-color: #aaa; }
+  .badge.local { background: #1f1f1f; color: #fff; border-color: #1f1f1f; }
+  .badge.cloud { background: #fff; color: #222; }
+  button {
+    margin-top: 8px;
+    align-self: flex-start;
+    padding: 8px 14px;
+    border: 1px solid #222;
+    background: #f4f4f4;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  button:disabled { color: #999; border-color: #aaa; cursor: not-allowed; background: #f4f4f4; }
+  .note-title { font-weight: 700; margin-bottom: 8px; }
+  .foot { margin-top: 12px; font-size: 12px; color: #888; }
+</style>
+</head>
+<body>
+  <div class="sheet">
+    <h1>参赛版原型</h1>
+    <div class="sub" id="subtitle">刚打开：还没选笔记</div>
+    <div class="steps">
+      <div class="step on" id="step1">1 选笔记</div>
+      <div class="step" id="step2">2 总结</div>
+      <div class="step" id="step3">3 看路径</div>
+    </div>
+    <div class="split">
+      <div class="left">
+        <div class="list" id="list"></div>
+        <div class="label">原文</div>
+        <div class="pane" id="source"><span class="placeholder">选一篇样例后，原文显示在这里</span></div>
+      </div>
+      <div class="right">
+        <div class="pane" id="summary">
+          <span class="placeholder" id="summaryText">先选一篇笔记</span>
+          <div class="badge wait" id="badge">本机 / 云端</div>
+        </div>
+        <button id="go" disabled>总结这篇</button>
+      </div>
+    </div>
+    <div class="foot">Firebase 项目 forevernote-hybrid。优先本机模型，没有就走云端。角标是这次请求实际走的路径。</div>
+  </div>
+<script type="module">
+const RECAPTCHA_SITE_KEY = "6LfM1y0uAAAAAJci1J9N5SDAKOYCYZKdktfMwjkO";
+const onLocalhost = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+if (onLocalhost) {
+  try {
+    const localConfig = await import("./local-config.js");
+    self.FIREBASE_APPCHECK_DEBUG_TOKEN = localConfig.appCheckDebugToken;
+  } catch (error) {
+    self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+  }
+}
+
+const { initializeApp } = await import("https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js");
+const { initializeAppCheck, ReCaptchaEnterpriseProvider } = await import("https://www.gstatic.com/firebasejs/13.4.0/firebase-app-check.js");
+const { getAI, getGenerativeModel, GoogleAIBackend, InferenceMode } = await import("https://www.gstatic.com/firebasejs/13.4.0/firebase-ai.js");
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCUxmvgI1i19gpUi16YIRoFsO0QrKrAtbM",
+  authDomain: "forevernote-hybrid.firebaseapp.com",
+  projectId: "forevernote-hybrid",
+  storageBucket: "forevernote-hybrid.firebasestorage.app",
+  messagingSenderId: "42003319530",
+  appId: "1:42003319530:web:0a1894e577e3290f9c6593"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+initializeAppCheck(firebaseApp, {
+  provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_SITE_KEY),
+  isTokenAutoRefreshEnabled: true
+});
+const ai = getAI(firebaseApp, { backend: new GoogleAIBackend() });
+const model = getGenerativeModel(ai, { mode: InferenceMode.PREFER_ON_DEVICE });
+
+const NOTES = [
+  {
+    id: "a",
+    title: "样例 A · 来回的一天",
+    body: "早上闹钟响了两次才起来。原定九点跟老周对一下展览的布展顺序，出门发现楼下的共享单车全是坏的，走了十几分钟才扫到一辆。到咖啡馆已经九点二十。老周没生气，他自己也刚到，笔记本还没打开，杯子上的奶泡已经塌了。我们本来只想确认三面墙的先后，结果他拿出甲方昨晚发来的一长串修改：入口的说明要缩短，第二面墙的时间线要倒过来，结尾那张雨后的照片他们觉得太暗。我一边记一边觉得这些意见互相打架。说明要短，时间线却要再加两个年份。照片太暗，可那点暗就是当时的光线，提亮之后地面的水渍会消失。\n\n对完已经十一点半。我没吃饭，去公司楼下买了个饭团，在工位上边吃边改说明。第一稿删了很多，读起来像通知。第二稿把年份补回去，又长了。第三稿我干脆回到最初的句子，只去掉两个形容词。改完盯着屏幕发呆，不知道这算不算交差。下午两点有个内部会，谈下个月要不要把周末开放日改成预约制。我准备听一听就行，会开到一半，主持人点名问展览这边的人流怎么估。我只能说布展还没定，开放日的人数我答不上。会后主管把我留下来，问甲方的修改今天能不能回。我说文字可以今天回，照片我想再看一眼原图，不想在邮件里先答应换掉。他问要不要把提亮版先发过去占个位置，我摇头。占位置往往就变成已经答应。回到工位，我把时间线又拉出来看了一遍。倒过来之后，参观的人会先看见结局，再看见开始。这也许是甲方想要的悬念，也许只是邮件里随手写的一句。老周下午发来消息，说他倾向于照做，因为再争一次，布展要再延三天。我回他：文字照做，照片先不争输赢，只给两个版本。发出去之后我又觉得“不争输赢”写得太满，像在表态。消息已经显示已读，就没有再改。\n\n傍晚下雨。我把原图拷到自己电脑上，做了两个版本，一个提亮，一个保持原来的暗。提亮之后水渍没了，现场那种刚下过雨的感觉也没了。我把两张都存好，邮件里只写了说明已按意见缩短，照片明天给两个版本，请他们选。发送之前又读了一遍，把“请查收”改成“明天补上”，觉得这样比较不像在推脱。回到家把湿鞋放在门口，热了剩下的粥。粥有点糊，底部结了一层。吃的时候还在想那张照片，想完又觉得今天来回处理的全是别人的句子，自己一句都没写下。碗泡在水池里，我打开这篇笔记，才把这一天按顺序记下来。",
+    summary: "这天本来只对一下布展顺序，结果卷进甲方互相打架的修改：缩短说明、倒转时间线、换掉偏暗的照片。说明改了三稿又回到初稿，只删了两个形容词。下午被临时追问开放日人流，只能说还估不了。晚上做了提亮和保持原暗两个版本，邮件里先回了文字，照片留到明天。回到家还在想那张照片，觉得这一天处理的都是别人的句子。"
+  },
+  {
+    id: "b",
+    title: "样例 B · 修那扇窗",
+    body: "先写结论好像也行，可我还是想从声音写起。半夜那扇窗又响，不是风大，是挂钩松了，一下一下敲窗框。我起来按了按，当时不响了，早上又响。房东在群里说他这周在外地，让我自己先看看，五金店就在路口。我下楼的时候其实想的不是窗，是昨天没回的那条消息，同学问我还去不去看展。我回了个“看情况”，现在觉得这四个字很讨厌。\n\n五金店老板问我要多大的螺丝。我说不出来。他让我拿旧的来。我又上楼，窗钩后面的那颗又锈又短，拧下来的时候墙皮掉了一小块。我把灰吹掉，装进口袋，下楼时在楼梯上遇见邻居的猫，猫蹲在鞋架上看我，好像我口袋里有吃的。老板看了螺丝，说这种规格现在少，先拿两颗近似的试试，不合适再换。我还买了一小卷密封条，因为缝里有风，响也许不只有挂钩的原因。\n\n回来先吃饭。面条煮过了，我还是吃完。吃的时候把密封条放在桌上，看了半天说明书，字很小。说明书假设窗框是直的，还画了箭头，从室内指向室外。我把纸条转了两次，还是不确定贴在哪一侧。楼下有人按喇叭，一声一声，和夜里的窗有点像，我才想起自己坐在这里是为了修窗，不是为了研究一张纸。装的时候发现窗框不是直的，左边紧，右边留着一条缝。我用手电照过那条缝，灰和一点柳絮堆在下面，所以风不是均匀地进来，而是从右下角钻。若只换螺丝，这个声音也许还会在。密封条贴上去，风小了，挂钩却更难扣上。我拆下来重贴，贴歪了一次。第二次勉强平。螺丝换上之后，窗不敲了，可关死要多使一点劲。我开开关关试了四五次，第一次还有一点金属碰金属的轻响，后面几次没有了。我坐在地板上听，屋里安静得能听见冰箱。猫不在楼梯上了。我把工具收进抽屉时又打开，怕明天还要拆。说明书揉成一团扔了，又捡回来夹进抽屉，因为上面写着规格，虽然我已经看不清。\n\n本来可以写到这里。可我又打开同学那条消息，还是没回。看展的事和窗没有关系，我却觉得是同一件没做完的事：都是先拖着，等它再响一次。晚上房东问好了没，我回好了，又补了一句墙皮掉了一点，他发了个表情，没说要不要补墙。我盯着那个表情看了一会，把它理解成“知道了就行”。如果明天还响，我再问他要不要换整套挂钩，而不是再买第三颗差不多的螺丝。我把旧螺丝放在窗台上，想着明天如果还响，就不要再自己猜规格。",
+    summary: "窗钩松了，夜里一下一下敲窗框。房东不在，让我自己去路口五金店。我说不出螺丝规格，拿着旧的去才买到近似的，顺手带了密封条。窗框不直，密封条贴了两次，风小了，关窗却更费劲。中间还挂着一条没回的消息，同学问还去不去看展，我之前只回了“看情况”。窗暂时不响了，旧螺丝还留在窗台上。"
+  },
+  {
+    id: "c",
+    title: "样例 C · 连着三天",
+    body: "周五晚上下班后没有直接回家。我在公司附近的打印店把一叠旧照片扫了，店员说当天取不了，周六上午来。照片是家里寄来的，没有年份，背面只有铅笔写的“河边”“过年”“不知道是谁”。我本来想当晚就建一个文件夹，按能认出的人分成几堆。打印店一关门，这个计划就停了。回家只煮了面，看了半集重复的节目，笔记里写下“明天去取”，就睡了。\n\n周六去得不早。打印店把文件拷进我的U盘，另外给了一张接触表，很小，人脸都糊。店员提醒我文件名是扫描顺序，不是拍摄顺序，打乱了也不要惊讶。我在店门口的长椅上翻了一遍，能叫出名字的不到一半。有几张连着出现，明显是同一次快门按下去的，表情只差一点点。这种重复让文件夹更难建：留一张代表就好，可我现在还不知道哪一张才算代表。我在纸上写了“先别删重复”，就把笔帽扣上。有一张是厨房，水龙头的样式还是老房子里的，可我不确定是哪一间厨房。另一张有个穿校服的人站在桥上，背对镜头，可能是表哥，也可能是邻居家的哥哥。我没有在长椅上做决定，把U盘放回包里，先去买了菜。下午本来要开始分类，中间接了一个关于展览说明的电话，讲了四十分钟，挂掉之后光没了。我只新建了三个文件夹：认得、像是、先留着。一张都没拖进去。\n\n周日下雨，适合对着屏幕。我先把接触表上的编号抄到一个文本文件里，免得只靠记忆对照。抄到四十多行就烦了，改成只标我犹豫的那些。我把“认得”尽量填上，大概三十张，多数是过年的饭桌，同一套碗出现了很多次。蓝边的碗、一只缺了口的汤勺、桌布上的格子，这些重复比人脸可靠。可可靠不等于我认得每一个坐在碗后面的人。有个阿姨笑得很熟，我叫不出名字，就暂时不把整桌算作已经认完。填到后来标准松了，只要背景里有那盆绿萝，我就算认得这是老客厅。这样不对，我又把几张拖回“像是”。最耗时间的是那张桥。我放大校服的领子，还是看不出学校。给家里发消息问，半天没有回。傍晚回来说，桥是城北那座，人是表哥，那年他住在我们家。我把这张放进“认得”，在备注里写上年份仍然空着。三个文件夹终于都有了东西，“先留着”还是最多。我数了一下，留着的比认得的多出差不多一倍。这个比例让我有点安心，说明我没有为了做完而乱认。我没有删任何一张。今晚先停，下周再问碗和厨房的事。",
+    summary: "周五把家里寄来的旧照片送去扫描，当晚没取到，只记下明天去取。周六拿到文件和一张很糊的接触表，能叫出名字的不到一半；新建了“认得、像是、先留着”三个文件夹，一张都没放进去，下午又被电话打断。周日才开始分类，饭桌和绿萝让一些照片被放进“认得”，桥上穿校服的人后来确认为表哥，年份仍空着。“先留着”还是最多，没有删任何一张，厨房和碗留到下周再问。"
+  }
+];
+
+const list = document.getElementById("list");
+const source = document.getElementById("source");
+const summaryText = document.getElementById("summaryText");
+const badge = document.getElementById("badge");
+const go = document.getElementById("go");
+const subtitle = document.getElementById("subtitle");
+const step1 = document.getElementById("step1");
+const step2 = document.getElementById("step2");
+const step3 = document.getElementById("step3");
+
+let selected = null;
+let running = false;
+
+function setSteps(state) {
+  step1.className = "step";
+  step2.className = "step";
+  step3.className = "step";
+  if (state === "pick") step1.classList.add("on");
+  if (state === "ready" || state === "running") {
+    step1.classList.add("done");
+    step2.classList.add("on");
+  }
+  if (state === "done") {
+    step1.classList.add("done");
+    step2.classList.add("done");
+    step3.classList.add("on");
+  }
+}
+
+function setBadge(kind) {
+  badge.className = "badge";
+  if (kind === "wait") {
+    badge.classList.add("wait");
+    badge.textContent = "本机 / 云端";
+  } else if (kind === "local") {
+    badge.classList.add("local");
+    badge.textContent = "本机";
+  } else {
+    badge.classList.add("cloud");
+    badge.textContent = "云端";
+  }
+}
+
+function renderPick() {
+  subtitle.textContent = "刚打开：还没选笔记";
+  source.innerHTML = '<span class="placeholder">选一篇样例后，原文显示在这里</span>';
+  summaryText.className = "placeholder";
+  summaryText.textContent = "先选一篇笔记";
+  setBadge("wait");
+  go.disabled = true;
+  go.textContent = "总结这篇";
+  setSteps("pick");
+}
+
+function renderReady() {
+  subtitle.textContent = "已选笔记：可以总结";
+  source.innerHTML = '<div class="note-title"></div><div></div>';
+  source.querySelector(".note-title").textContent = selected.title;
+  source.querySelector("div:last-child").textContent = selected.body;
+  summaryText.className = "placeholder";
+  summaryText.textContent = "点「总结这篇」，结果会出现在这里";
+  setBadge("wait");
+  go.disabled = false;
+  go.textContent = "总结这篇";
+  setSteps("ready");
+}
+
+NOTES.forEach((note) => {
+  const row = document.createElement("button");
+  row.type = "button";
+  row.className = "item";
+  row.textContent = note.title;
+  row.addEventListener("click", () => {
+    if (running) return;
+    selected = note;
+    document.querySelectorAll(".item").forEach((el) => el.classList.remove("selected"));
+    row.classList.add("selected");
+    renderReady();
+  });
+  list.appendChild(row);
+});
+
+function promptFor(note) {
+  return [
+    "请用中文总结下面这篇日记。",
+    "只根据正文，不要补充正文里没有的事。",
+    "写成一段，大约 120 到 180 字。",
+    "",
+    "标题：" + note.title,
+    "正文：",
+    note.body
+  ].join("\n");
+}
+
+go.addEventListener("click", async () => {
+  if (!selected || running) return;
+  running = true;
+  go.disabled = true;
+  go.textContent = "正在总结";
+  subtitle.textContent = "正在总结";
+  summaryText.className = "placeholder";
+  summaryText.textContent = "正在准备本机模型";
+  setBadge("wait");
+  setSteps("running");
+  try {
+    await model.initializeDeviceModel((value) => {
+      const pct = Math.round(Number(value) * 100);
+      if (pct > 0 && pct < 100) {
+        summaryText.textContent = "正在下载本机模型 " + pct + "%";
+      }
+    });
+    const result = await model.generateContent(promptFor(selected));
+    const text = result.response.text();
+    const source = String(result.response.inferenceSource || "").toUpperCase().replace(/-/g, "_");
+    summaryText.className = "";
+    summaryText.textContent = text;
+    if (source === "ON_DEVICE") {
+      setBadge("local");
+      subtitle.textContent = "完成：本次在本机";
+    } else if (source === "IN_CLOUD") {
+      setBadge("cloud");
+      subtitle.textContent = "完成：本次在云端";
+    } else {
+      setBadge("wait");
+      subtitle.textContent = "完成：路径未标明（" + String(result.response.inferenceSource) + "）";
+    }
+    setSteps("done");
+  } catch (error) {
+    summaryText.className = "";
+    summaryText.textContent = "总结没有完成：" + (error && error.message ? error.message : String(error));
+    setBadge("wait");
+    subtitle.textContent = "总结没有完成";
+    setSteps("ready");
+  }
+  go.disabled = false;
+  go.textContent = "总结这篇";
+  running = false;
+});
+
+renderPick();
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "hosting": {
+    "public": "contest-prototype",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "**/local-config.js",
+      "**/local-config.example.js"
+    ]
+  }
+}
